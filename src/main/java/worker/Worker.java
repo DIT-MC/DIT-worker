@@ -8,8 +8,8 @@ import org.json.JSONObject;
 class Worker {
   public static void main(String[] args) {
     try {
-      Jedis redis = connectToRedis("redis");
-      Connection dbConn = connectToDB("db");
+      Jedis redis = connectToRedis(System.getenv("REDIS_HOST"));
+      Connection dbConn = connectToDB(System.getenv("DB_HOST"));
 
       System.err.println("Watching vote queue");
 
@@ -48,6 +48,8 @@ class Worker {
   static Jedis connectToRedis(String host) {
     Jedis conn = new Jedis(host);
 
+    System.err.println("Connecting to redis (" + host  + ")...");
+
     while (true) {
       try {
         conn.keys("*");
@@ -58,7 +60,7 @@ class Worker {
       }
     }
 
-    System.err.println("Connected to redis");
+    System.err.println("Connected to redis (" + host + ")!");
     return conn;
   }
 
@@ -70,6 +72,8 @@ class Worker {
       Class.forName("org.postgresql.Driver");
       String url = "jdbc:postgresql://" + host + "/postgres";
 
+      System.out.println("Connecting to DB (" + host  + ")...");
+
       while (conn == null) {
         try {
           conn = DriverManager.getConnection(url, "postgres", "");
@@ -78,6 +82,8 @@ class Worker {
           sleep(1000);
         }
       }
+
+      System.out.println("Connected to DB (" + host + ")!");
 
       PreparedStatement st = conn.prepareStatement(
         "CREATE TABLE IF NOT EXISTS votes (id VARCHAR(255) NOT NULL UNIQUE, vote VARCHAR(255) NOT NULL)");

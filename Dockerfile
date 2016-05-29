@@ -1,5 +1,7 @@
 FROM java:7
 
+ENV REDIS_HOST=redis DB_HOST=db
+
 RUN apt-get update -qq && apt-get install -y maven && apt-get clean
 
 WORKDIR /code
